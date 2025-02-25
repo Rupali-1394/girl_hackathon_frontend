@@ -27,7 +27,7 @@ google_frontend/
 │   ├── index.js         # Renders the React app
 │── .gitignore           # Files to ignore in Git
 │── package.json         # Project dependencies & scripts
-│── README.md            # You are here 😉
+│── README.md            # You are here 😊
 ```
 
 ---
