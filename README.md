@@ -1,4 +1,4 @@
-# 🚀 Google Frontend  
+# 🚀 Google_Girls_hackathon_Frontend  
 
 ## 🌐 Live Demo  
 🔗 **[Visit the Deployed Website](https://google-frontend-9d7i.onrender.com)**  
