@@ -48,7 +48,7 @@ const TaxAIChat = () => {
         try {
             const { data } = await axios({
                 method: 'post',
-                url: 'http://localhost:5000/api/ai/chat',
+                url: `${process.env.REACT_APP_API_URL}/ai/chat`,
                 data: { message: input },
                 headers: {
                     'Content-Type': 'application/json'
