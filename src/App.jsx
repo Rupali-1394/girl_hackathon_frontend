@@ -11,6 +11,9 @@ import Feedback from './components/Feedback';
 import FraudDetection from './components/FraudDetection';
 import TaxLiabilityPredictor from './components/TaxLiabilityPredictor';
 import Collaboration from './components/Collaboration';
+import RegulatoryTracker from './components/RegulatoryTracker';
+import TaxPlanningDashboard from './components/TaxPlanningDashboard';
+import TaxOptimizationCoach from './components/TaxOptimizationCoach';
 
 function App() {
     const [showCalculator, setShowCalculator] = useState(false);
@@ -59,6 +62,15 @@ function App() {
                     </Grid>
                     <Grid item xs={12}>
                         <Collaboration taxData={taxResult} />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <RegulatoryTracker />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TaxPlanningDashboard />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TaxOptimizationCoach taxData={taxResult} />
                     </Grid>
                     <Grid item xs={12}>
                         <Feedback />
