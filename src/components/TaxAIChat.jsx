@@ -10,55 +10,49 @@ import {
     ListItem,
     Avatar,
     CircularProgress,
-    Alert,
-    useTheme
+    Alert
 } from '@mui/material';
 import { Person, SmartToy, Send } from '@mui/icons-material';
 import ReactMarkdown from 'react-markdown';
 
 const TaxAIChat = () => {
-    const theme = useTheme();
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const chatColors = {
-        userBg: theme.palette.primary.light,
-        userText: theme.palette.primary.contrastText,
-        aiBg: '#f5f7ff', // Light blue-gray background
-        aiText: '#2c3e50', // Dark blue-gray text
-        aiHighlight: theme.palette.primary.main
-    };
-
     const handleSend = async () => {
         if (!input.trim() || loading) return;
 
-        try {
-            setLoading(true);
-            setError(null);
+        // Add user message to chat
+        const userMessage = {
+            text: input.trim(),
+            sender: 'user',
+            timestamp: new Date().toISOString()
+        };
 
+        setMessages(prev => [...prev, userMessage]);
+        setInput('');
+        setLoading(true);
+        setError(null);
+
+        try {
             const response = await axios({
                 method: 'post',
                 url: `${process.env.REACT_APP_API_URL}/ai/chat`,
-                data: { message: input.trim() },
+                data: { message: userMessage.text },
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
 
-            if (!response.data) {
-                throw new Error('No response from server');
+            if (!response.data || response.data.error) {
+                throw new Error(response.data?.error || 'Failed to get response');
             }
 
-            const data = response.data;
-            
-            if (!data || data.error) {
-                throw new Error(data?.error || 'Failed to get AI response');
-            }
-
+            // Add AI response to chat
             setMessages(prev => [...prev, {
-                text: data.message,
+                text: response.data.message,
                 sender: 'ai',
                 timestamp: new Date().toISOString()
             }]);
@@ -70,68 +64,32 @@ const TaxAIChat = () => {
         }
     };
 
-    const renderMessage = (text) => {
-        return (
-            <ReactMarkdown
-                components={{
-                    h2: ({ children }) => (
-                        <Typography 
-                            variant="h6" 
-                            sx={{ 
-                                mt: 2, 
-                                mb: 1, 
-                                color: chatColors.aiHighlight,
-                                fontWeight: 600
-                            }}
-                        >
-                            {children}
-                        </Typography>
-                    ),
-                    p: ({ children }) => (
-                        <Typography 
-                            variant="body1" 
-                            sx={{ 
-                                mb: 1,
-                                color: chatColors.aiText,
-                                lineHeight: 1.6
-                            }}
-                        >
-                            {children}
-                        </Typography>
-                    ),
-                    ul: ({ children }) => (
-                        <Box component="ul" sx={{ pl: 2, mb: 1 }}>
-                            {children}
-                        </Box>
-                    ),
-                    li: ({ children }) => (
-                        <Box 
-                            component="li" 
-                            sx={{ 
-                                mb: 0.5,
-                                color: chatColors.aiText
-                            }}
-                        >
-                            {children}
-                        </Box>
-                    ),
-                    strong: ({ children }) => (
-                        <Box 
-                            component="span" 
-                            sx={{ 
-                                fontWeight: 600,
-                                color: chatColors.aiHighlight
-                            }}
-                        >
-                            {children}
-                        </Box>
-                    )
-                }}
-            >
-                {text}
-            </ReactMarkdown>
-        );
-    };
+    const renderMessage = (text) => (
+        <ReactMarkdown
+            components={{
+                p: ({ children }) => (
+                    <Typography 
+                        variant="body1" 
+                        sx={{ mb: 1, lineHeight: 1.6 }}
+                    >
+                        {children}
+                    </Typography>
+                ),
+                ul: ({ children }) => (
+                    <Box component="ul" sx={{ pl: 2, mb: 1 }}>
+                        {children}
+                    </Box>
+                ),
+                li: ({ children }) => (
+                    <Box component="li" sx={{ mb: 0.5 }}>
+                        {children}
+                    </Box>
+                )
+            }}
+        >
+            {text}
+        </ReactMarkdown>
+    );
 
     return (
         <Paper 
@@ -140,107 +98,61 @@ const TaxAIChat = () => {
                 p: 2, 
                 height: '600px', 
                 display: 'flex', 
-                flexDirection: 'column',
-                bgcolor: '#ffffff',
-                borderRadius: 2
+                flexDirection: 'column'
             }}
         >
-            <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{ 
-                    color: theme.palette.primary.main,
-                    fontWeight: 600,
-                    pb: 1,
-                    borderBottom: `1px solid ${theme.palette.divider}`
-                }}
-            >
+            <Typography variant="h6" gutterBottom>
                 Tax AI Assistant
             </Typography>
-            
+
             {error && (
                 <Alert 
                     severity="error" 
-                    sx={{ 
-                        mb: 2,
-                        borderRadius: 1
-                    }} 
                     onClose={() => setError(null)}
+                    sx={{ mb: 2 }}
                 >
                     {error}
                 </Alert>
             )}
-            
+
             <Box 
                 sx={{ 
                     flexGrow: 1, 
-                    overflow: 'auto', 
-                    mb: 2,
-                    px: 1,
-                    '&::-webkit-scrollbar': {
-                        width: '8px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        background: '#f1f1f1',
-                        borderRadius: '4px',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        background: '#c1c1c1',
-                        borderRadius: '4px',
-                        '&:hover': {
-                            background: '#a1a1a1',
-                        },
-                    },
+                    overflow: 'auto',
+                    mb: 2
                 }}
             >
                 <List>
                     {messages.map((message, index) => (
-                        <ListItem 
+                        <ListItem
                             key={index}
                             sx={{
-                                justifyContent: message.sender === 'user' ? 'flex-end' : 'flex-start',
-                                mb: 2,
-                                alignItems: 'flex-start'
+                                flexDirection: 'column',
+                                alignItems: message.sender === 'user' ? 'flex-end' : 'flex-start',
+                                mb: 2
                             }}
                         >
                             <Box 
                                 sx={{ 
-                                    display: 'flex', 
+                                    display: 'flex',
                                     alignItems: 'flex-start',
                                     flexDirection: message.sender === 'user' ? 'row-reverse' : 'row',
-                                    maxWidth: '80%'
+                                    gap: 1
                                 }}
                             >
-                                <Avatar 
-                                    sx={{ 
-                                        bgcolor: message.sender === 'user' ? 
-                                            theme.palette.primary.main : 
-                                            theme.palette.secondary.light,
-                                        m: 1,
-                                        mt: 2,
-                                        boxShadow: 1
-                                    }}
-                                >
+                                <Avatar>
                                     {message.sender === 'user' ? <Person /> : <SmartToy />}
                                 </Avatar>
                                 <Paper 
+                                    elevation={1}
                                     sx={{ 
-                                        p: 2, 
-                                        bgcolor: message.sender === 'user' ? 
-                                            chatColors.userBg : 
-                                            chatColors.aiBg,
-                                        color: message.sender === 'user' ? 
-                                            chatColors.userText : 
-                                            chatColors.aiText,
-                                        width: '100%',
-                                        borderRadius: 2,
-                                        boxShadow: 1
+                                        p: 2,
+                                        maxWidth: '80%',
+                                        bgcolor: message.sender === 'user' ? 'primary.light' : 'grey.50'
                                     }}
                                 >
                                     {message.sender === 'user' ? (
-                                        <Typography sx={{ color: 'inherit' }}>
-                                            {message.text}
-                                        </Typography>
+                                        <Typography>{message.text}</Typography>
                                     ) : (
                                         renderMessage(message.text)
                                     )}
@@ -249,22 +161,14 @@ const TaxAIChat = () => {
                         </ListItem>
                     ))}
                     {loading && (
-                        <ListItem sx={{ justifyContent: 'flex-start' }}>
-                            <CircularProgress size={24} sx={{ ml: 2 }} />
+                        <ListItem>
+                            <CircularProgress size={24} />
                         </ListItem>
                     )}
                 </List>
             </Box>
 
-            <Box 
-                sx={{ 
-                    display: 'flex', 
-                    gap: 1,
-                    p: 1,
-                    bgcolor: '#f8f9fa',
-                    borderRadius: 1
-                }}
-            >
+            <Box sx={{ display: 'flex', gap: 1 }}>
                 <TextField
                     fullWidth
                     value={input}
@@ -272,34 +176,14 @@ const TaxAIChat = () => {
                     placeholder="Ask about tax-related questions..."
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                     disabled={loading}
-                    sx={{
-                        '& .MuiOutlinedInput-root': {
-                            bgcolor: '#ffffff',
-                            '&:hover': {
-                                '& > fieldset': {
-                                    borderColor: theme.palette.primary.main,
-                                }
-                            }
-                        }
-                    }}
                 />
-                <Button 
-                    variant="contained" 
+                <Button
+                    variant="contained"
                     onClick={handleSend}
                     disabled={loading || !input.trim()}
-                    sx={{
-                        px: 3,
-                        bgcolor: theme.palette.primary.main,
-                        '&:hover': {
-                            bgcolor: theme.palette.primary.dark,
-                        }
-                    }}
+                    endIcon={<Send />}
                 >
-                    {loading ? (
-                        <CircularProgress size={24} sx={{ color: '#fff' }} />
-                    ) : (
-                        <Send />
-                    )}
+                    Send
                 </Button>
             </Box>
         </Paper>

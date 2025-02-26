@@ -22,11 +22,8 @@ import {
 import {
     Share,
     PersonAdd,
-    Email,
     Edit,
     Delete,
-    Comment,
-    Lock,
     LockOpen
 } from '@mui/icons-material';
 

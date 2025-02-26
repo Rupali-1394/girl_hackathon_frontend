@@ -6,10 +6,8 @@ import {
     Grid,
     Slider,
     TextField,
-    Button,
     Card,
-    CardContent,
-    Divider
+    CardContent
 } from '@mui/material';
 import {
     LineChart,
@@ -58,7 +56,7 @@ const TaxPlanningDashboard = ({ initialData }) => {
 
     useEffect(() => {
         calculateProjections();
-    }, [scenarios]);
+    }, [calculateProjections, scenarios]);
 
     const handleScenarioChange = (field, value) => {
         setScenarios(prev => ({

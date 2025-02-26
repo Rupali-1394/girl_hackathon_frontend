@@ -20,8 +20,6 @@ import {
 import {
     CheckCircle,
     Warning,
-    Schedule,
-    TrendingUp,
     Chat,
     VideoCall
 } from '@mui/icons-material';

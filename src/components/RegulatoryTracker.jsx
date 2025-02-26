@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     Paper,
     Typography,
     Box,
     List,
     ListItem,
-    ListItemText,
     Chip,
     IconButton,
     Alert,
@@ -20,8 +19,6 @@ import {
     MenuItem
 } from '@mui/material';
 import {
-    Notifications,
-    TrendingUp,
     Article,
     Settings
 } from '@mui/icons-material';
