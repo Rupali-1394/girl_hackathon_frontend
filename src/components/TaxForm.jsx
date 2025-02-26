@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { TextField, Button, Box, Paper } from '@mui/material';
-import { calculateTax } from '../services/api';
 
 const TaxForm = ({ onResult }) => {
     const [formData, setFormData] = useState({
@@ -8,14 +7,44 @@ const TaxForm = ({ onResult }) => {
         deductions: ''
     });
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const result = await calculateTax(formData);
-            onResult(result);
-        } catch (error) {
-            console.error('Error calculating tax:', error);
+    const calculateTax = (income, deductions) => {
+        const taxableIncome = Math.max(0, income - deductions);
+        let tax = 0;
+
+        // 2023 Tax Brackets (example)
+        if (taxableIncome <= 11000) {
+            tax = taxableIncome * 0.10;
+        } else if (taxableIncome <= 44725) {
+            tax = 1100 + (taxableIncome - 11000) * 0.12;
+        } else if (taxableIncome <= 95375) {
+            tax = 5147 + (taxableIncome - 44725) * 0.22;
+        } else if (taxableIncome <= 182100) {
+            tax = 16290 + (taxableIncome - 95375) * 0.24;
+        } else if (taxableIncome <= 231250) {
+            tax = 37104 + (taxableIncome - 182100) * 0.32;
+        } else if (taxableIncome <= 578125) {
+            tax = 52832 + (taxableIncome - 231250) * 0.35;
+        } else {
+            tax = 174238.25 + (taxableIncome - 578125) * 0.37;
         }
+
+        return {
+            annualIncome: income,
+            deductions: deductions,
+            taxableIncome: taxableIncome,
+            taxAmount: Math.round(tax),
+            netIncome: income - Math.round(tax),
+            effectiveRate: ((tax / income) * 100).toFixed(2)
+        };
+    };
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const result = calculateTax(
+            parseFloat(formData.annualIncome) || 0,
+            parseFloat(formData.deductions) || 0
+        );
+        onResult(result);
     };
 
     const handleChange = (e) => {

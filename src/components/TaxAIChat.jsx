@@ -24,7 +24,6 @@ const TaxAIChat = () => {
     const handleSend = async () => {
         if (!input.trim() || loading) return;
 
-        // Add user message to chat
         const userMessage = {
             text: input.trim(),
             sender: 'user',
@@ -36,6 +35,8 @@ const TaxAIChat = () => {
         setLoading(true);
         setError(null);
 
+        console.log('API URL:', process.env.REACT_APP_API_URL);
+
         try {
             const response = await axios({
                 method: 'post',
@@ -46,11 +47,12 @@ const TaxAIChat = () => {
                 }
             });
 
-            if (!response.data || response.data.error) {
-                throw new Error(response.data?.error || 'Failed to get response');
+            console.log('Response:', response.data);
+
+            if (!response.data || !response.data.message) {
+                throw new Error('Invalid response from server');
             }
 
-            // Add AI response to chat
             setMessages(prev => [...prev, {
                 text: response.data.message,
                 sender: 'ai',
@@ -58,7 +60,11 @@ const TaxAIChat = () => {
             }]);
         } catch (error) {
             console.error('Chat Error:', error);
-            setError('Failed to get response. Please try again.');
+            setError(
+                error.response?.data?.error || 
+                error.message || 
+                'Failed to get response. Please try again.'
+            );
         } finally {
             setLoading(false);
         }
